@@ -51,9 +51,7 @@ export default function Index() {
               Novo Tipo
             </Text>
           </Modal.Header>
-          <Modal.Body>
-            <Text>oi</Text>
-          </Modal.Body>
+          <Modal.Body></Modal.Body>
         </Modal.Content>
       </Modal>
     </Fragment>
