@@ -1,7 +1,7 @@
-import { Input as NativeBaseInput, FormControl, IInputProps } from "native-base";
+import { Input as NativeBaseInput, FormControl, IInputProps, Text } from "native-base";
 
 type InputTextProps = IInputProps & {
-  errorMessage: string;
+  errorMessage?: string;
 };
 
 export function InputText({ errorMessage, isInvalid, ...rest }: InputTextProps) {
@@ -9,7 +9,10 @@ export function InputText({ errorMessage, isInvalid, ...rest }: InputTextProps) 
 
   return (
     <FormControl isInvalid={valid}>
-      <NativeBaseInput {...rest} />
+      <NativeBaseInput {...rest} _invalid={{ borderWidth: 2 }} />
+      <FormControl.ErrorMessage>
+        <Text fontWeight={500}>{errorMessage}</Text>
+      </FormControl.ErrorMessage>
     </FormControl>
   );
 }
