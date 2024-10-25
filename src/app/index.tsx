@@ -2,14 +2,20 @@ import { Center, Heading, Column, Text, Row } from "native-base";
 import Header from "@/components/Header";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
+import { InputText } from "@/components/InputText";
 import { useContacts, TypeContact } from "@/hooks/useContacts";
 import { useEffect, useState, Fragment } from "react";
-import { InputText } from "@/components/InputText";
+import { useForm, Controller } from "react-hook-form";
 
 export default function Index() {
   const [typeCategories, setTypeCategories] = useState<TypeContact[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const { listCategoryTypes } = useContacts();
+
+  const {
+    control,
+    formState: { errors },
+  } = useForm();
 
   function handleOpenModal() {
     setModalVisible(true);
@@ -66,9 +72,18 @@ export default function Index() {
           </Text>
         }
         bodyChildren={
-          <Fragment>
-            <InputText placeholder="Nome do tipo" errorMessage="erro" />
-          </Fragment>
+          <Controller
+            name="type_contact"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <InputText
+                placeholder="Nome do tipo"
+                errorMessage={errors?.type_contact?.message}
+                onChangeText={onChange}
+                value={value}
+              />
+            )}
+          />
         }
         footerChildren={
           <Row space={2}>
