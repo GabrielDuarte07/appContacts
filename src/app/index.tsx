@@ -1,4 +1,5 @@
-import { Center, Heading, Column, Text, Row, useToast, Spinner } from "native-base";
+import { Center, Heading, Column, Text, Row, useToast, Spinner, FlatList } from "native-base";
+import { Feather } from "@expo/vector-icons";
 import Header from "@/components/Header";
 import { Modal } from "@/components/Modal";
 import { Button } from "@/components/Button";
@@ -41,8 +42,7 @@ export default function Index() {
   function handleSubmitNewType({ type_contact }: TypeContactFormProps) {
     setLoading(true);
     createContactType({ tp_name: type_contact })
-      .then(resolve => {
-        console.log(resolve);
+      .then(() => {
         toast.show({
           placement: "top",
           duration: 4000,
@@ -55,6 +55,7 @@ export default function Index() {
             />
           ),
         });
+        setModalVisible(false);
       })
       .catch(err => {
         console.log(err);
@@ -70,6 +71,10 @@ export default function Index() {
       .finally(() => setLoading(false));
   }
 
+  function handleRemoveContactType(id: number) {
+    console.log(id);
+  }
+
   useEffect(() => {
     listContactTypes().then(resolve => {
       const { types } = resolve;
@@ -77,7 +82,7 @@ export default function Index() {
     });
   }, [contactTypes]);
 
-  const title = contactTypes.length > 0 ? "Lista de Contatos" : "Nenhum contato cadastrado";
+  const title = contactTypes.length > 0 ? "Lista Tipo Contatos" : "Nenhum contato cadastrado";
 
   return (
     <Fragment>
@@ -85,7 +90,40 @@ export default function Index() {
         <Header />
         <Column w="full" my={5} px={3}>
           <Center>
-            <Heading fontSize={"xl"}>{title}</Heading>
+            <Heading fontSize={"xl"} my={3}>
+              {title}
+            </Heading>
+            {contactTypes.length > 0 && (
+              <FlatList
+                data={contactTypes}
+                keyExtractor={item => item.tp_id}
+                mb={5}
+                renderItem={({ item }) => (
+                  <Row
+                    w="full"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    borderBottomWidth={1}
+                    mb={4}
+                  >
+                    <Row>
+                      <Text fontWeight={700} fontSize={18}>
+                        {item.tp_name}
+                      </Text>
+                    </Row>
+                    <Row>
+                      <Feather
+                        name="x-circle"
+                        color="red"
+                        size={18}
+                        onPress={() => handleRemoveContactType(Number(item.tp_id))}
+                      />
+                    </Row>
+                  </Row>
+                )}
+              />
+            )}
+
             <Row space={2}>
               <Button
                 title="Novo tipo de contato"

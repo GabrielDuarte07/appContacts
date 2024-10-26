@@ -75,10 +75,29 @@ export function useContacts() {
     }
   }
 
+  async function removeContacyType(id: number) {
+    const query = "DELETE FROM Tipo_Contato WHERE tp_id = $id";
+    const statement = await db.prepareAsync(query);
+    try {
+      const { type } = await getContactTypeById(id);
+      if (!type) {
+        throw new ContactError("Tipo não encontrado para remoção");
+      }
+      await statement.executeAsync({ $id: id });
+
+      return { deleted: type };
+    } catch (e) {
+      throw e;
+    } finally {
+      await statement.finalizeAsync();
+    }
+  }
+
   return {
     listContactTypes,
     getContactTypeById,
     createContactType,
     getContactTypeByName,
+    removeContacyType,
   };
 }
