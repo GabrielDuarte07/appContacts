@@ -2,6 +2,7 @@ import { Center, Heading, Column, Text, Row, useToast, Spinner, FlatList } from 
 import { Feather } from "@expo/vector-icons";
 import Header from "@/components/Header";
 import { Modal } from "@/components/Modal";
+import { ModalConfirm } from "@/components/ModalConfirm";
 import { Button } from "@/components/Button";
 import { InputText } from "@/components/InputText";
 import { Alert } from "@/components/Alert";
@@ -15,9 +16,19 @@ type TypeContactFormProps = {
   type_contact: string;
 };
 
+type ModalConfirmProps = {
+  visible: boolean;
+  textHeader: string;
+  textBody: string;
+  loading: boolean;
+  titleButton: string;
+  handleSave: () => Promise<void> | void;
+};
+
 export default function Index() {
   const [contactTypes, setContactTypes] = useState<TypeContact[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState<ModalConfirmProps>({} as ModalConfirmProps);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const { listContactTypes, createContactType } = useContacts();
@@ -72,7 +83,15 @@ export default function Index() {
   }
 
   function handleRemoveContactType(id: number) {
-    console.log(id);
+    const dataModal: ModalConfirmProps = {
+      visible: true,
+      textBody: String(id),
+      textHeader: "header",
+      titleButton: "title",
+      handleSave: () => console.log("save"),
+      loading: false,
+    };
+    setModalConfirm(dataModal);
   }
 
   useEffect(() => {
@@ -149,6 +168,7 @@ export default function Index() {
           </Center>
         </Column>
       </Column>
+
       <Modal
         isOpen={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -190,6 +210,11 @@ export default function Index() {
             />
           </Row>
         }
+      />
+      <ModalConfirm
+        {...modalConfirm}
+        onClose={() => setModalConfirm(m => ({ ...m, visible: false }))}
+        isOpen={modalConfirm.visible}
       />
     </Fragment>
   );
