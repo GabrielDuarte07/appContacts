@@ -7,6 +7,17 @@ export type TypeContact = {
   updated_at: string;
 };
 
+export type Contact = {
+  id?: string;
+  name?: string;
+  nascimento?: string;
+  email?: string;
+  celular?: string;
+  avatar?: string;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export class ContactError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -45,7 +56,7 @@ export function useContacts() {
   }
 
   async function getContactTypeByName(name: string) {
-    const query = "SELECT * FROM Tipo_Contato WHERE tp_name = ?";
+    const query = "SELECT * FROM Tipo_Contato WHERE tp_name like %?%";
 
     try {
       const types = await db.getAllAsync<TypeContact>(query, [name.trim()]);
@@ -93,11 +104,16 @@ export function useContacts() {
     }
   }
 
+  async function listContacts(name?: string) {
+    const query = "";
+  }
+
   return {
     listContactTypes,
     getContactTypeById,
     createContactType,
     getContactTypeByName,
     removeContacyType,
+    listContacts,
   };
 }
