@@ -8,7 +8,7 @@ type ButtonProps = {
 };
 
 export function Button({ title, buttonNativeBase, titleProps }: ButtonProps) {
-  const buttonBgColor = titleProps?.bgColor ? titleProps.bgColor : "orange.500";
+  const buttonBgColor = buttonNativeBase?.bgColor ? buttonNativeBase.bgColor : "orange.500";
   const typeTitle = typeof title;
   return (
     <ButtonNativeBase {...buttonNativeBase} bgColor={buttonBgColor}>

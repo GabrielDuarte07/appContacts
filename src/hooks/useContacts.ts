@@ -105,7 +105,18 @@ export function useContacts() {
   }
 
   async function listContacts(name?: string) {
-    const query = "";
+    let query = "SELECT * FROM Contato";
+    if (name) {
+      query += ` WHERE name like %?%`;
+    }
+
+    try {
+      const contacts = await db.getAllAsync<Contact>(query, [name ?? ""]);
+      return { contacts };
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
   }
 
   return {
