@@ -1,1 +1,28 @@
-export default function TypesContact() {}
+import { Column, Center, Heading } from "native-base";
+import { Button } from "@/components/Button";
+import Header from "@/components/Header";
+
+export default function Index() {
+  return (
+    <Column>
+      <Header />
+      <Column w="full" my={5} px={3}>
+        <Center>
+          <Heading fontSize={"xl"} my={3}>
+            Lista de Contatos
+          </Heading>
+          <Button
+            title="Novo Contato"
+            buttonNativeBase={{
+              bgColor: "orange.500",
+              w: "full",
+              onPress: () => console.log("click"),
+              _pressed: { opacity: 0.7 },
+            }}
+            titleProps={{ color: "gray.100", fontSize: "lg", fontFamily: "body", fontWeight: 700 }}
+          />
+        </Center>
+      </Column>
+    </Column>
+  );
+}
