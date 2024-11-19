@@ -1,6 +1,7 @@
 import { Column, Center, Heading } from "native-base";
 import { Button } from "@/components/Button";
 import Header from "@/components/Header";
+import { router } from "expo-router";
 
 export default function Index() {
   return (
@@ -16,10 +17,15 @@ export default function Index() {
             buttonNativeBase={{
               bgColor: "orange.500",
               w: "full",
-              onPress: () => console.log("click"),
               _pressed: { opacity: 0.7 },
+              onPress: () => router.navigate({ pathname: "/newContact", params: { id: "" } }),
             }}
-            titleProps={{ color: "gray.100", fontSize: "lg", fontFamily: "body", fontWeight: 700 }}
+            titleProps={{
+              color: "gray.100",
+              fontSize: "lg",
+              fontFamily: "body",
+              fontWeight: 700,
+            }}
           />
         </Center>
       </Column>
