@@ -9,10 +9,13 @@ import { Button } from "@/components/Button";
 
 type FormContactProps = {
   name: string;
+  email: string;
 };
 
 const newContactResolver = yup.object({
   name: yup.string().required("O nome é obrigatório"),
+  email: yup.string().required("O email é obrigatório").email("E-mail invalido"),
+  celular: yup.string().required("O celular é obrigatório").min(14, "Digite o numero completo"),
 });
 
 export default function NewContact() {
@@ -47,6 +50,49 @@ export default function NewContact() {
                 onChangeText={onChange}
                 value={value}
                 errorMessage={errors.name?.message}
+              />
+            )}
+          />
+          <Controller
+            name="email"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <InputText
+                py={"4"}
+                mt={"4"}
+                placeholder="Email do Contato"
+                fontSize={"md"}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.email?.message}
+              />
+            )}
+          />
+          <Controller
+            name="celular"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <InputText
+                py={"4"}
+                mt={"4"}
+                placeholder="Celular do Contato"
+                fontSize={"md"}
+                onChangeText={text => {
+                  let v = text;
+                  v = v.replace(/\D/g, "");
+                  if (v.length < 4) {
+                    onChange(v);
+                    return;
+                  }
+                  v = v.replace(/(\d{2})/, "($1)");
+                  v = v.replace(/(\d{5})(\d{4})/g, "$1-$2");
+                  if (v.length > 14) {
+                    v = v.slice(0, 14);
+                  }
+                  onChange(v);
+                }}
+                value={value}
+                errorMessage={errors.celular?.message}
               />
             )}
           />
