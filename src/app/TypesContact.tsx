@@ -11,6 +11,7 @@ import { useEffect, useState, Fragment } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useLocalSearchParams } from "expo-router";
 
 type TypeContactFormProps = {
   type_contact: string;
@@ -31,7 +32,21 @@ export default function Index() {
   const [modalConfirm, setModalConfirm] = useState<ModalConfirmProps>({} as ModalConfirmProps);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const { newType } = useLocalSearchParams<{ newType?: string }>();
   const { listContactTypes, createContactType } = useContacts();
+
+  useEffect(() => {
+    if (newType !== "1") return;
+
+    toast.show({
+      placement: "bottom",
+      duration: 6000,
+      render: () => (
+        <Alert title="Atenção!" status="info" description="Cadastre um tipo de contato primeiro!" />
+      ),
+    });
+    setModalVisible(true);
+  }, [newType]);
 
   const typeContactResolver = yup.object({
     type_contact: yup

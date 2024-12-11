@@ -6,6 +6,9 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@/components/Button";
+import { useContext, useEffect } from "react";
+import { GlobalContext } from "@/contexts/Global";
+import { router } from "expo-router";
 
 type FormContactProps = {
   name: string;
@@ -19,7 +22,9 @@ const newContactResolver = yup.object({
 });
 
 export default function NewContact() {
+  const { typeContacts } = useContext(GlobalContext);
   const { id } = useLocalSearchParams<{ id?: string }>();
+  //const toast = useToast();
   const {
     control,
     handleSubmit,
@@ -27,6 +32,12 @@ export default function NewContact() {
   } = useForm({ resolver: yupResolver(newContactResolver) });
 
   const title = id ? "Edição de Contato" : "Novo Contato";
+
+  useEffect(() => {
+    if (typeContacts && typeContacts.length > 0) return;
+
+    router.navigate({ pathname: "/typesContact", params: { newType: "1" } });
+  }, [typeContacts]);
 
   function handleContactSubmit({ name }: FormContactProps) {
     console.log(name);

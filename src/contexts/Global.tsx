@@ -10,7 +10,7 @@ type GlobalContextProps = {
   setTypeContacts: Dispatch<SetStateAction<TypeContact[]>>;
 };
 
-const GlobalContext = createContext({} as GlobalContextProps);
+export const GlobalContext = createContext({} as GlobalContextProps);
 
 export function GlobalContextProvider({ children }: { children: ReactNode }) {
   const { listContactTypes, listContacts } = useContacts();
