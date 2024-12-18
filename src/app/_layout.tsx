@@ -12,6 +12,7 @@ import {
 } from "@expo-google-fonts/roboto";
 import { SQLiteProvider } from "expo-sqlite";
 import { initDatabase } from "../../database/initContactsDB";
+import { GlobalContextProvider } from "@/contexts/Global";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,7 +56,9 @@ export default function Layout() {
       <SQLiteProvider databaseName="contacts.db" onInit={initDatabase}>
         <StatusBar barStyle={"dark-content"} translucent />
         <SafeAreaView>
-          <Slot />
+          <GlobalContextProvider>
+            <Slot />
+          </GlobalContextProvider>
         </SafeAreaView>
       </SQLiteProvider>
     </NativeBaseProvider>

@@ -59,42 +59,48 @@ export default function Index() {
     control,
     formState: { errors },
     handleSubmit,
+    resetField,
   } = useForm({ resolver: yupResolver(typeContactResolver) });
+
+  function handleCleanInput() {
+    resetField("type_contact");
+  }
 
   function handleOpenModal() {
     setModalVisible(true);
   }
 
-  function handleSubmitNewType({ type_contact }: TypeContactFormProps) {
+  async function handleSubmitNewType({ type_contact }: TypeContactFormProps) {
     setLoading(true);
-    createContactType({ tp_name: type_contact })
-      .then(() => {
-        toast.show({
-          placement: "top",
-          duration: 4000,
-          render: () => (
-            <Alert
-              title="Success"
-              status="success"
-              colorScheme="success"
-              description="Tipo inserido com sucesso"
-            />
-          ),
-        });
-        setModalVisible(false);
-      })
-      .catch(err => {
-        console.log(err);
-        const errMsg = err instanceof ContactError ? err.message : "Erro ao inserir tipo";
-        toast.show({
-          placement: "top",
-          duration: 4000,
-          render: () => (
-            <Alert title="Error" status="error" colorScheme="danger" description={errMsg} />
-          ),
-        });
-      })
-      .finally(() => setLoading(false));
+    try {
+      console.log(type_contact);
+      await createContactType({ tp_name: type_contact });
+      toast.show({
+        placement: "top",
+        duration: 4000,
+        render: () => (
+          <Alert
+            title="Success"
+            status="success"
+            colorScheme="success"
+            description="Tipo inserido com sucesso"
+          />
+        ),
+      });
+      setModalVisible(false);
+    } catch (err) {
+      console.log(err);
+      const errMsg = err instanceof ContactError ? err.message : "Erro ao inserir tipo";
+      toast.show({
+        placement: "top",
+        duration: 4000,
+        render: () => (
+          <Alert title="Error" status="error" colorScheme="danger" description={errMsg} />
+        ),
+      });
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleRemoveContactType(id: number) {
@@ -212,7 +218,7 @@ export default function Index() {
             <Button
               title="Limpar"
               titleProps={{ color: "gray.100", fontSize: 12 }}
-              buttonNativeBase={{ _pressed: { opacity: 0.7 } }}
+              buttonNativeBase={{ _pressed: { opacity: 0.7 }, onPress: handleCleanInput }}
             />
             <Button
               title={!loading ? "Salvar" : <Spinner />}

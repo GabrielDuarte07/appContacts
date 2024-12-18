@@ -1,4 +1,4 @@
-import { Center, Column, Heading } from "native-base";
+import { Center, Column, Heading, Select } from "native-base";
 import Header from "@/components/Header";
 import { useLocalSearchParams } from "expo-router";
 import { InputText } from "@/components/InputText";
@@ -24,7 +24,6 @@ const newContactResolver = yup.object({
 export default function NewContact() {
   const { typeContacts } = useContext(GlobalContext);
   const { id } = useLocalSearchParams<{ id?: string }>();
-  //const toast = useToast();
   const {
     control,
     handleSubmit,
@@ -49,6 +48,11 @@ export default function NewContact() {
       <Column w="full" my={5} px={3}>
         <Center>
           <Heading>{title}</Heading>
+          <Select py={4} mt={4} placeholder="Tipo de Contato" fontSize={"md"} w={"100%"}>
+            {typeContacts.map(type => (
+              <Select.Item key={type.tp_id} value={type.tp_id} label={type.tp_name} />
+            ))}
+          </Select>
           <Controller
             name="name"
             control={control}

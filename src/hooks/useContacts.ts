@@ -56,10 +56,10 @@ export function useContacts() {
   }
 
   async function getContactTypeByName(name: string) {
-    const query = "SELECT * FROM Tipo_Contato WHERE tp_name like %?%";
+    const query = "SELECT * FROM Tipo_Contato WHERE tp_name like ?";
 
     try {
-      const types = await db.getAllAsync<TypeContact>(query, [name.trim()]);
+      const types = await db.getAllAsync<TypeContact>(query, [`%${name.trim()}%`]);
       return { types };
     } catch (e) {
       console.log(e);
@@ -68,8 +68,7 @@ export function useContacts() {
   }
 
   async function createContactType({ tp_name }: Pick<TypeContact, "tp_name">) {
-    const query = "INSERT INTO Tipo_Contato(tp_name) VALUES ($name)";
-    const statement = await db.prepareAsync(query);
+    const statement = await db.prepareAsync("INSERT INTO Tipo_Contato(tp_name) VALUES ($name)");
     try {
       const { types } = await getContactTypeByName(tp_name);
       if (types.length > 0) {
@@ -77,6 +76,10 @@ export function useContacts() {
       }
 
       const { lastInsertRowId } = await statement.executeAsync({ $name: tp_name.trim() });
+      // const { lastInsertRowId } = await db.runAsync(
+      //   "INSERT INTO Tipo_Contato(tp_name) VALUES (?)",
+      //   tp_name,
+      // );
       const created = await getContactTypeById(lastInsertRowId);
       return { created };
     } catch (e) {
