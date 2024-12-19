@@ -1,4 +1,4 @@
-import { Center, Column, Heading, Select } from "native-base";
+import { Center, Column, Heading } from "native-base";
 import Header from "@/components/Header";
 import { useLocalSearchParams } from "expo-router";
 import { InputText } from "@/components/InputText";
@@ -9,6 +9,7 @@ import { Button } from "@/components/Button";
 import { useContext, useEffect } from "react";
 import { GlobalContext } from "@/contexts/Global";
 import { router } from "expo-router";
+import { Dropdown } from "@/components/Dropdown";
 
 type FormContactProps = {
   name: string;
@@ -19,6 +20,7 @@ const newContactResolver = yup.object({
   name: yup.string().required("O nome é obrigatório"),
   email: yup.string().required("O email é obrigatório").email("E-mail invalido"),
   celular: yup.string().required("O celular é obrigatório").min(14, "Digite o numero completo"),
+  type_contact: yup.string().required("Selecione um tipo"),
 });
 
 export default function NewContact() {
@@ -48,11 +50,20 @@ export default function NewContact() {
       <Column w="full" my={5} px={3}>
         <Center>
           <Heading>{title}</Heading>
-          <Select py={4} mt={4} placeholder="Tipo de Contato" fontSize={"md"} w={"100%"}>
-            {typeContacts.map(type => (
-              <Select.Item key={type.tp_id} value={type.tp_id} label={type.tp_name} />
-            ))}
-          </Select>
+
+          <Controller
+            name="type_contact"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Dropdown
+                placeholder="Selecione um tipo de contato"
+                options={typeContacts}
+                selectedValue={value}
+                onValueChange={onChange}
+                errorMessage={errors.type_contact?.message}
+              />
+            )}
+          />
           <Controller
             name="name"
             control={control}
