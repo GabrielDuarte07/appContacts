@@ -11,7 +11,7 @@ import { useEffect, useState, Fragment } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 
 type TypeContactFormProps = {
   type_contact: string;
@@ -33,7 +33,7 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const { newType } = useLocalSearchParams<{ newType?: string }>();
-  const { listContactTypes, createContactType } = useContacts();
+  const { listContactTypes, createContactType, removeContacyType } = useContacts();
 
   useEffect(() => {
     if (newType !== "1") return;
@@ -62,13 +62,9 @@ export default function Index() {
     resetField,
   } = useForm({ resolver: yupResolver(typeContactResolver) });
 
-  function handleCleanInput() {
-    resetField("type_contact");
-  }
+  const handleCleanInput = () => resetField("type_contact");
 
-  function handleOpenModal() {
-    setModalVisible(true);
-  }
+  const handleOpenModal = () => setModalVisible(true);
 
   async function handleSubmitNewType({ type_contact }: TypeContactFormProps) {
     setLoading(true);
@@ -103,13 +99,42 @@ export default function Index() {
     }
   }
 
-  function handleRemoveContactType(id: number) {
+  async function remove(id: number) {
+    const dataModal = { ...modalConfirm, loading: true };
+    setModalConfirm(dataModal);
+    try {
+      const { deleted } = await removeContacyType(id);
+      const contacts = contactTypes.filter(c => c.tp_id !== deleted.tp_id);
+      setContactTypes(contacts);
+      toast.show({
+        placement: "top",
+        duration: 6000,
+        render: () => (
+          <Alert title="Success" description="Tipo excluido com sucesso" status="success" />
+        ),
+      });
+    } catch (err) {
+      const msgError =
+        err instanceof ContactError ? err.message : "Erro ao excluir tipo de contato";
+      toast.show({
+        placement: "top",
+        duration: 6000,
+        render: () => <Alert title="Erro" description={msgError} status="error" />,
+      });
+      console.log(err);
+    } finally {
+      const dataModal = { ...modalConfirm, visible: false, loading: false };
+      setModalConfirm(dataModal);
+    }
+  }
+
+  function handleDelete(id: number, name: string) {
     const dataModal: ModalConfirmProps = {
       visible: true,
-      textBody: String(id),
-      textHeader: "header",
-      titleButton: "title",
-      handleSave: () => console.log("save"),
+      textBody: `Confirma a remoção do tipo ${name}?`,
+      textHeader: "Atenção!",
+      titleButton: "Excluir",
+      handleSave: () => remove(id),
       loading: false,
     };
     setModalConfirm(dataModal);
@@ -156,7 +181,7 @@ export default function Index() {
                         name="x-circle"
                         color="red"
                         size={18}
-                        onPress={() => handleRemoveContactType(Number(item.tp_id))}
+                        onPress={() => handleDelete(Number(item.tp_id), item.tp_name)}
                       />
                     </Row>
                   </Row>
@@ -173,17 +198,17 @@ export default function Index() {
                   onPress: () => handleOpenModal(),
                   _pressed: { opacity: 0.7 },
                 }}
-                titleProps={{ color: "gray.100", fontSize: 10 }}
+                titleProps={{ color: "gray.100", fontSize: "md" }}
               />
               <Button
-                title="Salvar Contato"
+                title="Novo Contato"
                 buttonNativeBase={{
                   bgColor: "orange.500",
                   flex: 1,
-                  onPress: () => handleOpenModal(),
+                  onPress: () => router.navigate({ pathname: "/newContact" }),
                   _pressed: { opacity: 0.7 },
                 }}
-                titleProps={{ color: "gray.100", fontSize: 10 }}
+                titleProps={{ color: "gray.100", fontSize: "md" }}
               />
             </Row>
           </Center>

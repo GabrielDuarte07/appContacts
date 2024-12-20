@@ -9,7 +9,7 @@ export function InputText({ errorMessage, isInvalid, ...rest }: InputTextProps) 
 
   return (
     <FormControl isInvalid={valid}>
-      <NativeBaseInput {...rest} _invalid={{ borderWidth: 2 }} />
+      <NativeBaseInput {...rest} _invalid={{ borderWidth: 1 }} />
       <FormControl.ErrorMessage>
         <Text fontWeight={500}>{errorMessage}</Text>
       </FormControl.ErrorMessage>
