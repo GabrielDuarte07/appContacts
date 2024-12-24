@@ -2,8 +2,12 @@ import { Column, Center, Heading, Row } from "native-base";
 import { Button } from "@/components/Button";
 import Header from "@/components/Header";
 import { router } from "expo-router";
+import { useContext, useEffect } from "react";
+import { GlobalContext } from "@/contexts/Global";
 
 export default function Index() {
+  const { contacts } = useContext(GlobalContext);
+
   return (
     <Column>
       <Header />

@@ -2,9 +2,9 @@ import { Modal as ModalNativeBase, IModalProps } from "native-base";
 import { ReactNode } from "react";
 
 type ModalProps = IModalProps & {
-  headerChildren: ReactNode;
+  headerChildren?: ReactNode;
   bodyChildren: ReactNode;
-  footerChildren: ReactNode;
+  footerChildren?: ReactNode;
 };
 
 export function Modal({ headerChildren, bodyChildren, footerChildren, ...rest }: ModalProps) {

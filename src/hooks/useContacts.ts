@@ -18,6 +18,15 @@ export type Contact = {
   updated_at?: string;
 };
 
+type ContactCreate = {
+  name: string;
+  nascimento: string;
+  email: string;
+  celular: string;
+  avatar?: string;
+  tp_id: string;
+};
+
 export class ContactError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -51,6 +60,16 @@ export function useContacts() {
       return { type };
     } catch (e) {
       console.log(e);
+      throw e;
+    }
+  }
+
+  async function getContactById(id: number) {
+    const query = "SELECT * FROM Contato WHERE id = ?";
+    try {
+      const contact = await db.getFirstAsync<Contact>(query, [id]);
+      return { contact };
+    } catch (e) {
       throw e;
     }
   }
@@ -122,6 +141,37 @@ export function useContacts() {
     }
   }
 
+  async function createContact({ name, celular, email, nascimento, tp_id, avatar }: ContactCreate) {
+    const query = `
+      INSERT INTO Contato(name,nascimento,email,celular,avatar,tp_id)
+      VALUES ($name,$nascimento,$email,$celular,$avatar,$td_id)
+    `;
+
+    const statement = await db.prepareAsync(query);
+    try {
+      const avatarValue = avatar ? avatar : null;
+      const { lastInsertRowId } = await statement.executeAsync({
+        $name: name,
+        $nascimento: nascimento,
+        $email: email,
+        $celular: celular,
+        $avatar: avatarValue,
+        $tp_id: tp_id,
+      });
+
+      if (!lastInsertRowId) {
+        throw new ContactError("Erro ao retornar novo contato");
+      }
+
+      const { contact } = await getContactById(lastInsertRowId);
+      return { contact };
+    } catch (e) {
+      throw e;
+    } finally {
+      await statement.finalizeAsync();
+    }
+  }
+
   return {
     listContactTypes,
     getContactTypeById,
@@ -129,5 +179,7 @@ export function useContacts() {
     getContactTypeByName,
     removeContacyType,
     listContacts,
+    createContact,
+    getContactById,
   };
 }

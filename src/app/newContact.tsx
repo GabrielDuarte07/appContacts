@@ -1,4 +1,4 @@
-import { Center, Column, Heading } from "native-base";
+import { Center, Column, Heading, useToast } from "native-base";
 import Header from "@/components/Header";
 import { useLocalSearchParams } from "expo-router";
 import { InputText } from "@/components/InputText";
@@ -6,14 +6,21 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { Button } from "@/components/Button";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { GlobalContext } from "@/contexts/Global";
 import { router } from "expo-router";
 import { Dropdown } from "@/components/Dropdown";
+import RNDateTimePicker from "@react-native-community/datetimepicker";
+import { Feather } from "@expo/vector-icons";
+import { Contact, ContactError, useContacts } from "@/hooks/useContacts";
+import { Alert } from "@/components/Alert";
 
 type FormContactProps = {
   name: string;
   email: string;
+  nascimento: string;
+  type_contact: string;
+  celular: string;
 };
 
 const newContactResolver = yup.object({
@@ -21,15 +28,21 @@ const newContactResolver = yup.object({
   email: yup.string().required("O email é obrigatório").email("E-mail invalido"),
   celular: yup.string().required("O celular é obrigatório").min(14, "Digite o numero completo"),
   type_contact: yup.string().required("Selecione um tipo"),
+  nascimento: yup.string().required("Selecione uma data de nascimento"),
 });
 
 export default function NewContact() {
-  const { typeContacts } = useContext(GlobalContext);
+  const { typeContacts, setContacts } = useContext(GlobalContext);
+  const [calendarVisible, setCalendarVisible] = useState(false);
+  const [pickedDate, setPickedDate] = useState(new Date().getTime());
+  const { createContact } = useContacts();
+  const toast = useToast();
   const { id } = useLocalSearchParams<{ id?: string }>();
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm({ resolver: yupResolver(newContactResolver) });
 
   const title = id ? "Edição de Contato" : "Novo Contato";
@@ -40,8 +53,42 @@ export default function NewContact() {
     router.navigate({ pathname: "/typesContact", params: { newType: "1" } });
   }, [typeContacts]);
 
-  function handleContactSubmit({ name }: FormContactProps) {
-    console.log(name);
+  function handleContactSubmit({
+    name,
+    email,
+    celular,
+    nascimento,
+    type_contact,
+  }: FormContactProps) {
+    createContact({ name, celular, email, nascimento, tp_id: type_contact })
+      .then(({ contact }) => {
+        console.log(contact);
+        setContacts(c => [...c, contact as Contact]);
+        router.navigate({ pathname: "/" });
+        toast.show({
+          placement: "top",
+          duration: 4000,
+          render: () => (
+            <Alert
+              title="Sucesso"
+              status="success"
+              colorScheme="success"
+              description="Contato inserido com sucesso"
+            />
+          ),
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        const msgError = err instanceof ContactError ? err.message : "Erro ao inserir contato";
+        toast.show({
+          placement: "top",
+          duration: 4000,
+          render: () => (
+            <Alert title="Error" status="error" colorScheme="danger" description={msgError} />
+          ),
+        });
+      });
   }
 
   return (
@@ -122,6 +169,47 @@ export default function NewContact() {
               />
             )}
           />
+          <Controller
+            name="nascimento"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <InputText
+                py={"4"}
+                mt={"4"}
+                readOnly
+                onPress={() => setCalendarVisible(!calendarVisible)}
+                placeholder="Data de nascimento"
+                fontSize={"md"}
+                onChangeText={onChange}
+                value={value}
+                errorMessage={errors.nascimento?.message}
+              />
+            )}
+          />
+          {calendarVisible && (
+            <Column mt={4}>
+              <Feather
+                name="x"
+                size={20}
+                color={"red"}
+                style={{ textAlign: "right", fontWeight: "bold" }}
+                onPress={() => setCalendarVisible(false)}
+              />
+              <RNDateTimePicker
+                mode="date"
+                value={new Date(pickedDate)}
+                onChange={event => {
+                  console.log(event.nativeEvent);
+                  setPickedDate(event.nativeEvent.timestamp);
+                  setValue(
+                    "nascimento",
+                    new Date(event.nativeEvent.timestamp).toLocaleDateString("pt-br"),
+                  );
+                }}
+                display="spinner"
+              />
+            </Column>
+          )}
           <Button
             title="Salvar"
             buttonNativeBase={{
