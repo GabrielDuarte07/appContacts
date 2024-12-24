@@ -144,7 +144,7 @@ export function useContacts() {
   async function createContact({ name, celular, email, nascimento, tp_id, avatar }: ContactCreate) {
     const query = `
       INSERT INTO Contato(name,nascimento,email,celular,avatar,tp_id)
-      VALUES ($name,$nascimento,$email,$celular,$avatar,$td_id)
+      VALUES ($name,$nascimento,$email,$celular,$avatar,$tp_id)
     `;
 
     const statement = await db.prepareAsync(query);
@@ -156,7 +156,7 @@ export function useContacts() {
         $email: email,
         $celular: celular,
         $avatar: avatarValue,
-        $tp_id: tp_id,
+        $tp_id: Number(tp_id),
       });
 
       if (!lastInsertRowId) {

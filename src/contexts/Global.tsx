@@ -35,7 +35,7 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
           ),
         });
       });
-  }, [contacts]);
+  }, []);
 
   useEffect(() => {
     listContactTypes()
@@ -54,7 +54,7 @@ export function GlobalContextProvider({ children }: { children: ReactNode }) {
           ),
         });
       });
-  }, [typeContacts]);
+  }, []);
 
   return (
     <GlobalContext.Provider value={{ contacts, setContacts, typeContacts, setTypeContacts }}>

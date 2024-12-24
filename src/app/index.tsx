@@ -1,8 +1,9 @@
-import { Column, Center, Heading, Row } from "native-base";
+import { Column, Center, Heading, Row, FlatList, Text } from "native-base";
+import { Feather } from "@expo/vector-icons";
 import { Button } from "@/components/Button";
 import Header from "@/components/Header";
 import { router } from "expo-router";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { GlobalContext } from "@/contexts/Global";
 
 export default function Index() {
@@ -16,6 +17,31 @@ export default function Index() {
           <Heading fontSize={"xl"} my={3}>
             Lista de Contatos
           </Heading>
+          {contacts.length > 0 && (
+            <FlatList
+              data={contacts}
+              keyExtractor={contact => String(contact.id)}
+              renderItem={({ item }) => (
+                <Row
+                  mb={5}
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  w={"full"}
+                  borderBottomWidth={1}
+                  marginBottom={4}
+                >
+                  <Column>
+                    <Text fontWeight={700} fontSize={18}>
+                      {item.name}
+                    </Text>
+                  </Column>
+                  <Column>
+                    <Feather name="x-circle" color="red" size={18} onPress={() => {}} />
+                  </Column>
+                </Row>
+              )}
+            />
+          )}
           <Row>
             <Button
               title="Tipos contato"

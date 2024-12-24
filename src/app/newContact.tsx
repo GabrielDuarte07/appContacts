@@ -1,4 +1,4 @@
-import { Center, Column, Heading, useToast } from "native-base";
+import { Center, Column, Heading, useToast, Spinner } from "native-base";
 import Header from "@/components/Header";
 import { useLocalSearchParams } from "expo-router";
 import { InputText } from "@/components/InputText";
@@ -34,6 +34,7 @@ const newContactResolver = yup.object({
 export default function NewContact() {
   const { typeContacts, setContacts } = useContext(GlobalContext);
   const [calendarVisible, setCalendarVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [pickedDate, setPickedDate] = useState(new Date().getTime());
   const { createContact } = useContacts();
   const toast = useToast();
@@ -60,7 +61,9 @@ export default function NewContact() {
     nascimento,
     type_contact,
   }: FormContactProps) {
-    createContact({ name, celular, email, nascimento, tp_id: type_contact })
+    setLoading(true);
+    const nascimentoFixed = nascimento.split("/").reverse().join("-");
+    createContact({ name, celular, email, nascimento: nascimentoFixed, tp_id: type_contact })
       .then(({ contact }) => {
         console.log(contact);
         setContacts(c => [...c, contact as Contact]);
@@ -88,7 +91,8 @@ export default function NewContact() {
             <Alert title="Error" status="error" colorScheme="danger" description={msgError} />
           ),
         });
-      });
+      })
+      .finally(() => setLoading(false));
   }
 
   return (
@@ -199,7 +203,6 @@ export default function NewContact() {
                 mode="date"
                 value={new Date(pickedDate)}
                 onChange={event => {
-                  console.log(event.nativeEvent);
                   setPickedDate(event.nativeEvent.timestamp);
                   setValue(
                     "nascimento",
@@ -211,7 +214,7 @@ export default function NewContact() {
             </Column>
           )}
           <Button
-            title="Salvar"
+            title={loading === false ? "Salvar" : <Spinner />}
             buttonNativeBase={{
               mt: "4",
               w: "full",
