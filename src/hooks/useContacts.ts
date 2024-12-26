@@ -102,8 +102,8 @@ export function useContacts() {
       //   "INSERT INTO Tipo_Contato(tp_name) VALUES (?)",
       //   tp_name,
       // );
-      const created = await getContactTypeById(lastInsertRowId);
-      return { created };
+      const { type } = await getContactTypeById(lastInsertRowId);
+      return { created: type };
     } catch (e) {
       throw e;
     } finally {

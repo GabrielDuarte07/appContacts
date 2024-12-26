@@ -7,8 +7,9 @@ import { router } from "expo-router";
 import { useContext } from "react";
 import { GlobalContext } from "@/contexts/Global";
 import { ModalConfirm } from "@/components/ModalConfirm";
-import { ContactError, useContacts } from "@/hooks/useContacts";
+import { Contact, ContactError, TypeContact, useContacts } from "@/hooks/useContacts";
 import { Alert } from "@/components/Alert";
+import { Modal } from "@/components/Modal";
 
 type ModalConfirmProps = {
   visible: boolean;
@@ -19,10 +20,16 @@ type ModalConfirmProps = {
   handleSave: () => Promise<void> | void;
 };
 
+type ModalDetailsProps = Contact &
+  TypeContact & {
+    visible: boolean;
+  };
+
 export default function Index() {
   const { contacts, typeContacts, setContacts } = useContext(GlobalContext);
   const { removeContact } = useContacts();
   const [modalConfirm, setModalConfirm] = useState<ModalConfirmProps>({} as ModalConfirmProps);
+  const [modalDetails, setModalDetails] = useState({} as ModalDetailsProps);
   const toast = useToast();
 
   function handleDelete(id: number) {
@@ -76,6 +83,22 @@ export default function Index() {
     setModalConfirm(modalConfirmObj);
   }
 
+  function showDetails(id: string) {
+    const contact = contacts.find(c => String(c.id) === id);
+    const typeContact = typeContacts.find(tp => tp.tp_id === contact?.tp_id);
+    const details: ModalDetailsProps = {
+      visible: true,
+      celular: contact?.celular,
+      name: contact?.name,
+      tp_name: typeContact?.tp_name,
+      nascimento: new Date(String(contact?.nascimento)).toLocaleDateString("pt-br"),
+      email: contact?.email,
+      created_at: new Date(String(contact?.created_at)).toLocaleDateString("pt-br"),
+      updated_at: new Date(String(contact?.updated_at)).toLocaleDateString("pt-br"),
+    };
+    setModalDetails(details);
+  }
+
   return (
     <Fragment>
       <Column>
@@ -99,7 +122,11 @@ export default function Index() {
                     marginBottom={4}
                   >
                     <Column>
-                      <Text fontWeight={700} fontSize={18}>
+                      <Text
+                        fontWeight={700}
+                        fontSize={18}
+                        onPress={() => showDetails(String(item.id))}
+                      >
                         {item.name} ({typeContacts.find(tp => tp.tp_id === item.tp_id)?.tp_name})
                       </Text>
                     </Column>
@@ -155,6 +182,41 @@ export default function Index() {
         {...modalConfirm}
         onClose={() => setModalConfirm(m => ({ ...m, visible: false }))}
         isOpen={modalConfirm.visible}
+      />
+      <Modal
+        isOpen={modalDetails.visible}
+        onClose={() => setModalDetails(m => ({ ...m, visible: false }))}
+        size={"xl"}
+        headerChildren={
+          <Text fontWeight={700} fontSize={"xl"}>
+            Informações do Contato
+          </Text>
+        }
+        bodyChildren={
+          <Column space={2}>
+            <Text fontSize={"lg"}>{modalDetails.tp_name}</Text>
+            <Text fontSize={"lg"}>{modalDetails?.name}</Text>
+            <Text fontSize={"lg"}>{modalDetails?.email}</Text>
+            <Text fontSize={"lg"}>{modalDetails?.celular}</Text>
+            <Text fontSize={"lg"}>
+              {new Date(
+                String(modalDetails?.nascimento).split("/").reverse().join("-"),
+              ).toLocaleDateString()}
+            </Text>
+            <Text fontSize={"lg"}>
+              Cadastrado em:{" "}
+              {new Date(
+                String(modalDetails?.created_at).split("/").reverse().join("-"),
+              ).toLocaleDateString()}
+            </Text>
+            <Text fontSize={"lg"}>
+              atualizado em:{" "}
+              {new Date(
+                String(modalDetails?.updated_at).split("/").reverse().join("-"),
+              ).toLocaleDateString()}
+            </Text>
+          </Column>
+        }
       />
     </Fragment>
   );

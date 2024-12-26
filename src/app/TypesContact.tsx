@@ -7,11 +7,12 @@ import { Button } from "@/components/Button";
 import { InputText } from "@/components/InputText";
 import { Alert } from "@/components/Alert";
 import { useContacts, TypeContact, ContactError } from "@/hooks/useContacts";
-import { useEffect, useState, Fragment } from "react";
+import { useEffect, useState, Fragment, useContext } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { router, useLocalSearchParams } from "expo-router";
+import { GlobalContext } from "@/contexts/Global";
 
 type TypeContactFormProps = {
   type_contact: string;
@@ -27,13 +28,13 @@ type ModalConfirmProps = {
 };
 
 export default function Index() {
-  const [contactTypes, setContactTypes] = useState<TypeContact[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalConfirm, setModalConfirm] = useState<ModalConfirmProps>({} as ModalConfirmProps);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
   const { newType } = useLocalSearchParams<{ newType?: string }>();
-  const { listContactTypes, createContactType, removeContacyType } = useContacts();
+  const { createContactType, removeContacyType } = useContacts();
+  const { setTypeContacts, typeContacts } = useContext(GlobalContext);
 
   useEffect(() => {
     if (newType !== "1") return;
@@ -69,8 +70,9 @@ export default function Index() {
   async function handleSubmitNewType({ type_contact }: TypeContactFormProps) {
     setLoading(true);
     try {
-      console.log(type_contact);
-      await createContactType({ tp_name: type_contact });
+      const { created } = await createContactType({ tp_name: type_contact });
+      console.log(created);
+      setTypeContacts(tp => [...tp, created as TypeContact]);
       toast.show({
         placement: "top",
         duration: 4000,
@@ -104,8 +106,8 @@ export default function Index() {
     setModalConfirm(dataModal);
     try {
       const { deleted } = await removeContacyType(id);
-      const contacts = contactTypes.filter(c => c.tp_id !== deleted.tp_id);
-      setContactTypes(contacts);
+      const contacts = typeContacts.filter(c => c.tp_id !== deleted.tp_id);
+      setTypeContacts(contacts);
       toast.show({
         placement: "top",
         duration: 6000,
@@ -140,14 +142,14 @@ export default function Index() {
     setModalConfirm(dataModal);
   }
 
-  useEffect(() => {
-    listContactTypes().then(resolve => {
-      const { types } = resolve;
-      setContactTypes(types);
-    });
-  }, [contactTypes]);
+  // useEffect(() => {
+  //   listContactTypes().then(resolve => {
+  //     const { types } = resolve;
+  //     setContactTypes(types);
+  //   });
+  // }, [contactTypes]);
 
-  const title = contactTypes.length > 0 ? "Lista Tipo Contatos" : "Nenhum contato cadastrado";
+  const title = typeContacts.length > 0 ? "Lista Tipo Contatos" : "Nenhum contato cadastrado";
 
   return (
     <Fragment>
@@ -158,9 +160,9 @@ export default function Index() {
             <Heading fontSize={"xl"} my={3}>
               {title}
             </Heading>
-            {contactTypes.length > 0 && (
+            {typeContacts.length > 0 && (
               <FlatList
-                data={contactTypes}
+                data={typeContacts}
                 keyExtractor={item => String(item.tp_id)}
                 mb={5}
                 renderItem={({ item }) => (
