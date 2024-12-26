@@ -65,9 +65,7 @@ export default function NewContact() {
     const nascimentoFixed = nascimento.split("/").reverse().join("-");
     createContact({ name, celular, email, nascimento: nascimentoFixed, tp_id: type_contact })
       .then(({ contact }) => {
-        console.log(contact);
         setContacts(c => [...c, contact as Contact]);
-        router.navigate({ pathname: "/" });
         toast.show({
           placement: "top",
           duration: 4000,
@@ -80,6 +78,7 @@ export default function NewContact() {
             />
           ),
         });
+        router.navigate({ pathname: "/" });
       })
       .catch(err => {
         console.log(err);

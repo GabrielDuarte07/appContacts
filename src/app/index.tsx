@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { Column, Center, Heading, Row, FlatList, Text } from "native-base";
+import { Column, Center, Heading, Row, FlatList, Text, useToast } from "native-base";
 import { Feather } from "@expo/vector-icons";
 import { Button } from "@/components/Button";
 import Header from "@/components/Header";
@@ -7,6 +7,8 @@ import { router } from "expo-router";
 import { useContext } from "react";
 import { GlobalContext } from "@/contexts/Global";
 import { ModalConfirm } from "@/components/ModalConfirm";
+import { ContactError, useContacts } from "@/hooks/useContacts";
+import { Alert } from "@/components/Alert";
 
 type ModalConfirmProps = {
   visible: boolean;
@@ -18,8 +20,49 @@ type ModalConfirmProps = {
 };
 
 export default function Index() {
-  const { contacts, typeContacts } = useContext(GlobalContext);
+  const { contacts, typeContacts, setContacts } = useContext(GlobalContext);
+  const { removeContact } = useContacts();
   const [modalConfirm, setModalConfirm] = useState<ModalConfirmProps>({} as ModalConfirmProps);
+  const toast = useToast();
+
+  function handleDelete(id: number) {
+    const modalConfirmObj = { ...modalConfirm, loading: true };
+    setModalConfirm(modalConfirmObj);
+    removeContact(id)
+      .then(({ contact }) => {
+        toast.closeAll();
+        toast.show({
+          placement: "top",
+          duration: 4000,
+          render: () => (
+            <Alert
+              status="success"
+              title="Sucesso"
+              description="Contato excluido com sucesso"
+              colorScheme="success"
+            />
+          ),
+        });
+        const newContacts = contacts.filter(c => c.id !== contact.id);
+        setContacts(newContacts);
+      })
+      .catch(err => {
+        console.log(err);
+        const msgError = err instanceof ContactError ? err.message : "Erro ao excluir contato";
+        toast.closeAll();
+        toast.show({
+          placement: "top",
+          duration: 4000,
+          render: () => (
+            <Alert status="error" title="Erro" description={msgError} colorScheme="danger" />
+          ),
+        });
+      })
+      .finally(() => {
+        const modalConfirmObj = { ...modalConfirm, loading: false };
+        setModalConfirm(modalConfirmObj);
+      });
+  }
 
   function confirmDelete(id: number, name: string) {
     const modalConfirmObj = {
@@ -28,7 +71,7 @@ export default function Index() {
       textBody: `Confirma a exclusão do contato ${name}?`,
       titleButton: "Excluir",
       loading: false,
-      handleSave: () => console.log("excluir"),
+      handleSave: () => handleDelete(id),
     };
     setModalConfirm(modalConfirmObj);
   }
