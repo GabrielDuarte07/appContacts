@@ -1,10 +1,10 @@
 import { useSQLiteContext } from "expo-sqlite";
 
 export type TypeContact = {
-  tp_id: string;
-  tp_name: string;
-  created_at: string;
-  updated_at: string;
+  tp_id?: string;
+  tp_name?: string;
+  tp_created_at?: string;
+  tp_updated_at?: string;
 };
 
 export type Contact = {
@@ -14,6 +14,7 @@ export type Contact = {
   email?: string;
   celular?: string;
   avatar?: string;
+  tp_id?: string;
   created_at?: string;
   updated_at?: string;
 };
@@ -65,7 +66,9 @@ export function useContacts() {
   }
 
   async function getContactById(id: number) {
-    const query = "SELECT * FROM Contato WHERE id = ?";
+    const query = `
+      SELECT A.* FROM Contato A WHERE A.id = ?
+    `;
     try {
       const contact = await db.getFirstAsync<Contact>(query, [id]);
       return { contact };
@@ -86,7 +89,7 @@ export function useContacts() {
     }
   }
 
-  async function createContactType({ tp_name }: Pick<TypeContact, "tp_name">) {
+  async function createContactType({ tp_name }: Required<Pick<TypeContact, "tp_name">>) {
     const statement = await db.prepareAsync("INSERT INTO Tipo_Contato(tp_name) VALUES ($name)");
     try {
       const { types } = await getContactTypeByName(tp_name);
@@ -121,6 +124,23 @@ export function useContacts() {
       return { deleted: type };
     } catch (e) {
       throw e;
+    } finally {
+      await statement.finalizeAsync();
+    }
+  }
+
+  async function removeContact(id: number) {
+    const query = "DELETE FROM Contato WHERE id = $id";
+    const statement = await db.prepareAsync(query);
+    try {
+      const { contact } = await getContactById(id);
+      if (!contact) {
+        throw new ContactError("Contato não encontrado");
+      }
+      await statement.executeAsync({ $id: id });
+      return { contact };
+    } catch (err) {
+      throw err;
     } finally {
       await statement.finalizeAsync();
     }
@@ -178,6 +198,7 @@ export function useContacts() {
     createContactType,
     getContactTypeByName,
     removeContacyType,
+    removeContact,
     listContacts,
     createContact,
     getContactById,

@@ -161,7 +161,7 @@ export default function Index() {
             {contactTypes.length > 0 && (
               <FlatList
                 data={contactTypes}
-                keyExtractor={item => item.tp_id}
+                keyExtractor={item => String(item.tp_id)}
                 mb={5}
                 renderItem={({ item }) => (
                   <Row
@@ -181,7 +181,7 @@ export default function Index() {
                         name="x-circle"
                         color="red"
                         size={18}
-                        onPress={() => handleDelete(Number(item.tp_id), item.tp_name)}
+                        onPress={() => handleDelete(Number(item.tp_id), String(item.tp_name))}
                       />
                     </Row>
                   </Row>
